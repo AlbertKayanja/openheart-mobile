@@ -1,0 +1,49 @@
+name: openheart
+description: OpenHeart Counselling
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Firebase – all updated to latest compatible versions
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4           # ← upgraded to match firebase_core ^4.x
+  cloud_firestore: ^6.1.2         # ← latest stable
+
+  # Routing
+  go_router: ^14.2.7
+
+  # UI
+  google_fonts: ^6.2.1
+
+  # WebView – stable version (avoids many Kotlin compilation issues)
+  webview_flutter: ^4.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+
+  # Assets – commented out until you add real files
+  assets:
+    - assets/branding/openheart_icon_1024.png
+    - assets/branding/openheart_logo_full_2048.png
+    - assets/icons/
+
+flutter_icons:
+  android: true
+  ios: true
+  # Uncomment only when you have the icon file
+  image_path: assets/icons/openheart_icon_1024.png
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: assets/icons/openheart_icon_1024.png
