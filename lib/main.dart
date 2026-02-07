@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-import 'src/app_router.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+import 'firebase_options.dart';
+import 'src/features/entry/entry_screen.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const OpenHeartApp());
 }
 
@@ -18,8 +26,7 @@ class OpenHeartApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
       ),
-      onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: '/',
+      home: const EntryScreen(),
     );
   }
 }

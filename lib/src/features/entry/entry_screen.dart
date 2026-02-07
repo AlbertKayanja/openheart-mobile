@@ -14,79 +14,64 @@ class EntryScreen extends StatelessWidget {
           children: [
             const Spacer(),
 
-            /// ✅ FULL LOGO (restored, bigger, correct asset)
+            // ✅ ORIGINAL LOGO (UNCHANGED)
             Image.asset(
               'assets/branding/openheart_logo_full_2048.png',
-              width: 240, // bigger but safe
-              fit: BoxFit.contain,
+              width: 220, // slightly bigger as requested
             ),
 
-            const SizedBox(height: 48),
+            const SizedBox(height: 60),
 
-            /// ✅ I AM A COUNSELLOR
+            // ✅ I AM A COUNSELLOR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size.fromHeight(56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CounsellorAuthPage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'I am a Counsellor',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const CounsellorAuthPage(),
                     ),
-                  ),
+                  );
+                },
+                child: const Text(
+                  'I am a Counsellor',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),
 
             const SizedBox(height: 16),
 
-            /// ✅ I NEED HELP
+            // ✅ I NEED HELP
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white),
+                  minimumSize: const Size.fromHeight(56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  onPressed: () {
-                    // Keep existing behavior / placeholder
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('User flow coming next'),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'I Need Help',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                ),
+                onPressed: () {
+                  // future user flow
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User flow coming soon')),
+                  );
+                },
+                child: const Text(
+                  'I Need Help',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ),
