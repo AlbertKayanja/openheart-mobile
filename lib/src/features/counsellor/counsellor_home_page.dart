@@ -4,10 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 class CounsellorHomePage extends StatelessWidget {
   const CounsellorHomePage({super.key});
 
-  void _logout(BuildContext context) async {
+  Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+
     if (!context.mounted) return;
-    Navigator.pop(context);
+
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
@@ -15,7 +17,7 @@ class CounsellorHomePage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Colors.black, // ✅ MATCHES YOUR APP THEME
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
@@ -37,9 +39,8 @@ class CounsellorHomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 30),
+            const SizedBox(height: 40),
 
-            /// Welcome
             const Text(
               "Welcome,",
               style: TextStyle(
@@ -51,11 +52,11 @@ class CounsellorHomePage extends StatelessWidget {
             const SizedBox(height: 6),
 
             Text(
-              user?.email ?? "Counsellor",
+              user?.email ?? "",
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFB39DDB), // ✅ Your purple accent tone
+                color: Color(0xFFB39DDB),
               ),
             ),
 
@@ -72,42 +73,22 @@ class CounsellorHomePage extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            _buildStatCard(
-              icon: Icons.calendar_today,
-              title: "Upcoming Sessions",
-              value: "0",
-            ),
-
+            _statCard(Icons.calendar_today, "Upcoming Sessions", "0"),
             const SizedBox(height: 15),
-
-            _buildStatCard(
-              icon: Icons.people,
-              title: "Active Clients",
-              value: "0",
-            ),
-
+            _statCard(Icons.people, "Active Clients", "0"),
             const SizedBox(height: 15),
-
-            _buildStatCard(
-              icon: Icons.star,
-              title: "Reviews",
-              value: "0",
-            ),
+            _statCard(Icons.star, "Reviews", "0"),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatCard({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
+  Widget _statCard(IconData icon, String title, String value) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E), // ✅ Dark card color
+        color: const Color(0xFF1C1C1E),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
