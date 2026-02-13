@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../counsellor/counsellor_auth_page.dart';
 
 class EntryScreen extends StatelessWidget {
@@ -7,77 +9,56 @@ class EntryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
 
-            // ✅ ORIGINAL LOGO (UNCHANGED)
-            Image.asset(
-              'assets/branding/openheart_logo_full_2048.png',
-              width: 220, // slightly bigger as requested
-            ),
+                // ✅ LOGO (correct pubspec path)
+                Image.asset(
+                  'assets/branding/openheart_logo_full_2048.png',
+                  height: 220,
+                  fit: BoxFit.contain,
+                ),
 
-            const SizedBox(height: 60),
+                const SizedBox(height: 40),
 
-            // ✅ I AM A COUNSELLOR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                Text(
+                  "Welcome to OpenHeart",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CounsellorAuthPage(),
+
+                const SizedBox(height: 50),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CounsellorAuthPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "I am a Counsellor",
+                      style: TextStyle(fontSize: 16),
                     ),
-                  );
-                },
-                child: const Text(
-                  'I am a Counsellor',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // ✅ I NEED HELP
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white),
-                  minimumSize: const Size.fromHeight(56),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                onPressed: () {
-                  // future user flow
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User flow coming soon')),
-                  );
-                },
-                child: const Text(
-                  'I Need Help',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ),
 
-            const Spacer(),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'counsellor_home_page.dart';
+
 class CounsellorAuthPage extends StatefulWidget {
   const CounsellorAuthPage({super.key});
 
@@ -9,148 +11,184 @@ class CounsellorAuthPage extends StatefulWidget {
 }
 
 class _CounsellorAuthPageState extends State<CounsellorAuthPage> {
-  final _email = TextEditingController();
-  final _password = TextEditingController();
-  final _name = TextEditingController();
-  final _qualification = TextEditingController();
-  final _experience = TextEditingController();
+  final _auth = FirebaseAuth.instance;
+
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
 
   bool isLogin = true;
-  bool loading = false;
+  bool isLoading = false;
 
-  final auth = FirebaseAuth.instance;
+  final List<String> counsellingCategories = [
+    "Anxiety",
+    "Depression",
+    "Marriage",
+    "Addiction",
+    "Trauma",
+    "Career",
+  ];
+
+  final List<String> selectedCategories = [];
 
   Future<void> _submit() async {
-    setState(() => loading = true);
+    setState(() => isLoading = true);
 
     try {
       if (isLogin) {
-        await auth.signInWithEmailAndPassword(
-          email: _email.text.trim(),
-          password: _password.text.trim(),
+        await _auth.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
       } else {
-        await auth.createUserWithEmailAndPassword(
-          email: _email.text.trim(),
-          password: _password.text.trim(),
+        await _auth.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
         );
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Success')),
-        );
-      }
-    } catch (e) {
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CounsellorHomePage(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(e.message ?? "Authentication failed")),
       );
     }
 
-    setState(() => loading = false);
-  }
-
-  InputDecoration _field(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(color: Colors.white),
-      enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.white),
-      ),
-      focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.white),
-      ),
-    );
+    if (mounted) {
+      setState(() => isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text('Counsellor'),
+        title: Text(isLogin ? "Counsellor Login" : "Counsellor Register"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 24),
 
-            Text(
-              isLogin ? 'Counsellor Login' : 'Counsellor Registration',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            // ✅ Bigger Logo (only change made)
+            Image.asset(
+              'assets/branding/openheart_logo_full_2048.png',
+              height: 180, // ← increased slightly
+              fit: BoxFit.contain,
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 30),
+
+            if (!isLogin)
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: "Full Name",
+                ),
+              ),
+
+            if (!isLogin) const SizedBox(height: 16),
 
             TextField(
-              controller: _email,
-              style: const TextStyle(color: Colors.white),
-              decoration: _field('Email'),
+              controller: _emailController,
+              decoration: const InputDecoration(
+                labelText: "Email",
+              ),
             ),
 
             const SizedBox(height: 16),
 
             TextField(
-              controller: _password,
+              controller: _passwordController,
               obscureText: true,
-              style: const TextStyle(color: Colors.white),
-              decoration: _field('Password'),
+              decoration: const InputDecoration(
+                labelText: "Password",
+              ),
             ),
 
+            const SizedBox(height: 20),
+
             if (!isLogin) ...[
-              const SizedBox(height: 16),
-              TextField(
-                controller: _name,
-                style: const TextStyle(color: Colors.white),
-                decoration: _field('Full Name'),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Preferred Counselling Categories",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _qualification,
-                style: const TextStyle(color: Colors.white),
-                decoration: _field('Qualification'),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _experience,
-                keyboardType: TextInputType.number,
-                style: const TextStyle(color: Colors.white),
-                decoration: _field('Years of Experience'),
+              const SizedBox(height: 10),
+
+              Column(
+                children: counsellingCategories.map((category) {
+                  return CheckboxListTile(
+                    title: Text(category),
+                    value: selectedCategories.contains(category),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedCategories.add(category);
+                        } else {
+                          selectedCategories.remove(category);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
               ),
             ],
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
 
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                minimumSize: const Size.fromHeight(50),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : _submit,
+                child: isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Text(isLogin ? "Login" : "Register"),
               ),
-              onPressed: loading ? null : _submit,
-              child: Text(isLogin ? 'Login' : 'Register'),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             TextButton(
-              onPressed: () => setState(() => isLogin = !isLogin),
+              onPressed: () {
+                setState(() {
+                  isLogin = !isLogin;
+                });
+              },
               child: Text(
                 isLogin
-                    ? 'New counsellor? Register'
-                    : 'Already registered? Login',
-                style: const TextStyle(color: Colors.white70),
+                    ? "Don't have an account? Register"
+                    : "Already have an account? Login",
               ),
             ),
+
+            const SizedBox(height: 10),
+
+            if (!isLogin)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    isLogin = true;
+                  });
+                },
+                child: const Text("Cancel"),
+              ),
           ],
         ),
       ),

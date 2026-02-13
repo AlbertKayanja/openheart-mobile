@@ -26,7 +26,7 @@ class OpenHeartApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: Colors.black,
       ),
-      home: const EntryScreen(),
+      home: EntryScreen(),
     );
   }
 }
