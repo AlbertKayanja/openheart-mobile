@@ -1,118 +1,154 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class CounsellorHomePage extends StatelessWidget {
+class CounsellorHomePage extends StatefulWidget {
   const CounsellorHomePage({super.key});
 
-  Future<void> _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
+  @override
+  State<CounsellorHomePage> createState() => _CounsellorHomePageState();
+}
 
-    if (!context.mounted) return;
+class _CounsellorHomePageState extends State<CounsellorHomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
+  final List<String> _tabs = [
+    "assigned",
+    "active",
+    "completed",
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: _tabs.length, vsync: this);
+  }
+
+  String get _currentUserId => FirebaseAuth.instance.currentUser!.uid;
+
+  Color _statusColor(String status) {
+    switch (status) {
+      case "assigned":
+        return Colors.blue;
+      case "active":
+        return Colors.green;
+      case "completed":
+        return Colors.grey;
+      default:
+        return Colors.black;
+    }
+  }
+
+  Future<void> _acceptRequest(String requestId) async {
+    await FirebaseFirestore.instance
+        .collection("requests")
+        .doc(requestId)
+        .update({
+      "status": "active",
+      "acceptedAt": FieldValue.serverTimestamp(),
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> _completeRequest(String requestId) async {
+    await FirebaseFirestore.instance
+        .collection("requests")
+        .doc(requestId)
+        .update({
+      "status": "completed",
+      "completedAt": FieldValue.serverTimestamp(),
+      "updatedAt": FieldValue.serverTimestamp(),
+    });
+  }
+
+  Widget _buildRequestList(String status) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("requests")
+          .where("counsellorId", isEqualTo: _currentUserId)
+          .where("status", isEqualTo: status)
+          .orderBy("createdAt", descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final docs = snapshot.data!.docs;
+
+        if (docs.isEmpty) {
+          return const Center(child: Text("No requests"));
+        }
+
+        return ListView.builder(
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ListTile(
+                title: Text(data["category"] ?? ""),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data["description"] ?? ""),
+                    const SizedBox(height: 4),
+                    Text(
+                      status.toUpperCase(),
+                      style: TextStyle(
+                        color: _statusColor(status),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: _buildActionButton(status, doc.id),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget? _buildActionButton(String status, String requestId) {
+    if (status == "assigned") {
+      return ElevatedButton(
+        onPressed: () => _acceptRequest(requestId),
+        child: const Text("Accept"),
+      );
+    }
+
+    if (status == "active") {
+      return ElevatedButton(
+        onPressed: () => _completeRequest(requestId),
+        child: const Text("Complete"),
+      );
+    }
+
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          "Counsellor Home",
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40),
-
-            const Text(
-              "Welcome,",
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.white70,
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            Text(
-              user?.email ?? "",
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFB39DDB),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            const Text(
-              "Overview",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            _statCard(Icons.calendar_today, "Upcoming Sessions", "0"),
-            const SizedBox(height: 15),
-            _statCard(Icons.people, "Active Clients", "0"),
-            const SizedBox(height: 15),
-            _statCard(Icons.star, "Reviews", "0"),
+        title: const Text("Counsellor Dashboard"),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: "Assigned"),
+            Tab(text: "Active"),
+            Tab(text: "Completed"),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _statCard(IconData icon, String title, String value) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 26, color: const Color(0xFFB39DDB)),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white70,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFB39DDB),
-            ),
-          ),
-        ],
+      body: TabBarView(
+        controller: _tabController,
+        children: _tabs.map((status) => _buildRequestList(status)).toList(),
       ),
     );
   }
